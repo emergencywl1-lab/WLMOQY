@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WL Emergency</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg: #14101d;
+  --bg-soft: #1b1526;
+  --surface: #221a33;
+  --surface-2: #2a2140;
+  --border: #362a52;
+  --text: #ece7f7;
+  --muted: #a89bc4;
+  --muted-2: #7c6f9c;
+  --accent: #8b5cf6;
+  --accent-2: #b794f6;
+  --accent-deep: #5b21b6;
+  --green: #34d399;
+  --red: #f87171;
+  --orange: #fbbf24;
+  --black-status: #71717a;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background: radial-gradient(1200px 600px at 80% -10%, #2a1d47 0%, transparent 60%), var(--bg);
+  color: var(--text);
+  font-family:'Tajawal', sans-serif;
+  min-height:100vh;
+  line-height:1.6;
+}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;}
+::selection{background:var(--accent-deep);color:#fff;}
+::-webkit-scrollbar{width:8px;}
+::-webkit-scrollbar-thumb{background:var(--surface-2);border-radius:8px;}
+
+/* ===== layout shell ===== */
+#app{min-height:100vh;display:flex;flex-direction:column;}
+.container{max-width:1180px;margin:0 auto;padding:0 24px;}
+@media(max-width:640px){.container{padding:0 16px;}}
+
+/* ===== topbar ===== */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(20,16,29,.88);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.topbar-inner{display:flex;align-items:center;justify-content:space-between;height:68px;}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;letter-spacing:.2px;}
+.brand-mark{
+  width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(145deg, var(--accent), var(--accent-deep));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Almarai',sans-serif;font-weight:800;font-size:15px;color:#fff;
+  box-shadow:0 4px 14px rgba(139,92,246,.4);
+}
+.brand small{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:1px;}
+.nav-links{display:flex;gap:4px;align-items:center;}
+.nav-links a{
+  padding:9px 14px;border-radius:9px;font-size:14.5px;color:var(--muted);
+  transition:background .15s,color .15s;
+}
+.nav-links a:hover,.nav-links a.active{background:var(--surface);color:var(--text);}
+.nav-cta{display:flex;align-items:center;gap:10px;}
+.btn{
+  padding:10px 18px;border-radius:10px;border:none;font-size:14.5px;font-weight:700;
+  transition:transform .12s,box-shadow .12s,background .15s;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:linear-gradient(145deg,var(--accent),var(--accent-deep));color:#fff;box-shadow:0 6px 16px rgba(139,92,246,.35);}
+.btn-primary:hover{box-shadow:0 8px 22px rgba(139,92,246,.5);}
+.btn-ghost{background:var(--surface);color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--surface-2);}
+.btn-sm{padding:7px 12px;font-size:13px;border-radius:8px;}
+.btn-danger{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.3);}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);}
+.user-chip{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);padding:6px 12px 6px 6px;border-radius:30px;cursor:pointer;}
+.user-chip .av{width:30px;height:30px;border-radius:50%;background:linear-gradient(145deg,var(--accent-2),var(--accent-deep));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;}
+.hamburger{display:none;background:none;border:none;color:var(--text);font-size:22px;}
+
+/* mobile nav */
+.mobile-menu{display:none;}
+@media(max-width:900px){
+  .nav-links{display:none;}
+  .hamburger{display:block;}
+  .mobile-menu.open{display:flex;flex-direction:column;gap:2px;padding:10px 16px 16px;border-top:1px solid var(--border);}
+  .mobile-menu a{padding:11px 10px;border-radius:8px;color:var(--muted);}
+  .mobile-menu a.active{background:var(--surface);color:var(--text);}
+}
+
+main{flex:1;}
+
+/* ===== hero ===== */
+.hero{
+  position:relative;overflow:hidden;
+  padding:70px 0 60px;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(700px 300px at 15% 0%, rgba(139,92,246,.18), transparent 60%),
+    radial-gradient(900px 500px at 100% 20%, rgba(91,33,182,.25), transparent 55%);
+}
+.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr;}}
+.eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--accent-2);background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);padding:6px 12px;border-radius:20px;margin-bottom:18px;}
+.dot-pulse{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(52,211,153,.6);animation:pulse 2s infinite;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,211,153,.55);}70%{box-shadow:0 0 0 8px rgba(52,211,153,0);}100%{box-shadow:0 0 0 0 rgba(52,211,153,0);}}
+.hero h1{font-size:44px;font-weight:800;line-height:1.25;margin:0 0 16px;font-family:'Almarai',sans-serif;}
+.hero h1 span{color:var(--accent-2);}
+.hero p{color:var(--muted);font-size:16.5px;max-width:520px;margin:0 0 28px;}
+@media(max-width:640px){.hero h1{font-size:31px;}}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
+
+.hero-panel{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:22px;box-shadow:var(--shadow);
+}
+.hero-banner{
+  height:110px;border-radius:10px;margin-bottom:18px;
+  background:
+    repeating-linear-gradient(135deg, rgba(139,92,246,.16) 0 2px, transparent 2px 14px),
+    linear-gradient(120deg, var(--accent-deep), #1b1130 70%);
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--border);
+}
+.hero-banner .bmark{font-family:'Almarai',sans-serif;font-weight:800;font-size:22px;letter-spacing:1px;color:#fff;opacity:.9;}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px;}
+.stat-row:last-child{border-bottom:none;}
+.stat-row .label{color:var(--muted);}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:12.5px;font-weight:700;}
+.badge-green{background:rgba(52,211,153,.14);color:var(--green);}
+.badge-red{background:rgba(248,113,113,.14);color:var(--red);}
+.badge-orange{background:rgba(251,191,36,.14);color:var(--orange);}
+.badge-black{background:rgba(113,113,122,.18);color:#d4d4d8;}
+.badge-purple{background:rgba(139,92,246,.16);color:var(--accent-2);}
+
+/* section generic */
+.section{padding:56px 0;}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:26px;flex-wrap:wrap;gap:10px;}
+.section-head h2{font-size:24px;font-weight:800;margin:0;font-family:'Almarai',sans-serif;}
+.section-head p{color:var(--muted);margin:6px 0 0;font-size:14px;}
+
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+@media(max-width:900px){.quick-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:480px){.quick-grid{grid-template-columns:1fr;}}
+.qcard{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px;transition:border-color .15s,transform .15s;
+}
+.qcard:hover{border-color:var(--accent);transform:translateY(-3px);}
+.qcard .qi{width:38px;height:38px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:18px;}
+.qcard h3{margin:0 0 6px;font-size:15.5px;}
+.qcard p{margin:0;color:var(--muted);font-size:13px;}
+
+footer{border-top:1px solid var(--border);padding:30px 0;color:var(--muted-2);font-size:13.5px;}
+.footer-inner{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;align-items:center;}
+
+/* cards / generic surfaces */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;}
+.grid-2{display:grid;grid-template-columns:2fr 1fr;gap:20px;}
+@media(max-width:900px){.grid-2{grid-template-columns:1fr;}}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:22px;overflow-x:auto;}
+.tab{padding:11px 16px;font-size:14px;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;cursor:pointer;}
+.tab.active{color:var(--text);border-color:var(--accent);}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:13.5px;color:var(--muted);margin-bottom:7px;}
+.field input,.field select,.field textarea{
+  width:100%;background:var(--bg-soft);border:1px solid var(--border);border-radius:9px;
+  padding:11px 13px;color:var(--text);font-family:inherit;font-size:14.5px;
+}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+th,td{padding:11px 10px;text-align:right;border-bottom:1px solid var(--border);}
+th{color:var(--muted);font-weight:600;font-size:12.5px;}
+tr:hover td{background:rgba(255,255,255,.015);}
+.table-wrap{overflow-x:auto;}
+.empty{text-align:center;padding:50px 20px;color:var(--muted);}
+.empty .ei{font-size:34px;margin-bottom:10px;}
+
+.profile-head{display:flex;align-items:center;gap:18px;margin-bottom:26px;flex-wrap:wrap;}
+.profile-av{width:74px;height:74px;border-radius:20px;background:linear-gradient(145deg,var(--accent-2),var(--accent-deep));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:26px;color:#fff;}
+.stat-mini{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
+.stat-mini .n{font-size:22px;font-weight:800;font-family:'Almarai',sans-serif;}
+.stat-mini .l{font-size:12.5px;color:var(--muted);margin-top:4px;}
+
+.pill-status{display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:14px 18px;}
+
+.q-block{background:var(--bg-soft);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:12px;}
+.q-opt{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;margin-top:6px;border:1px solid transparent;cursor:pointer;}
+.q-opt:hover{background:rgba(255,255,255,.03);}
+.q-opt.sel{border-color:var(--accent);background:rgba(139,92,246,.1);}
+.timer-box{position:sticky;top:80px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center;}
+.timer-box .tv{font-size:30px;font-weight:800;font-family:'Almarai',sans-serif;color:var(--accent-2);}
+
+.stream-card,.news-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.thumb{height:150px;background:linear-gradient(135deg,#241a3b,#3b2360);display:flex;align-items:center;justify-content:center;font-size:30px;position:relative;}
+.live-tag{position:absolute;top:10px;left:10px;background:var(--red);color:#fff;font-size:11px;font-weight:800;padding:3px 9px;border-radius:6px;display:flex;align-items:center;gap:4px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+@media(max-width:900px){.grid-3{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.grid-3{grid-template-columns:1fr;}}
+
+.rule-cat{margin-bottom:26px;}
+.rule-cat h3{font-size:16.5px;margin:0 0 12px;display:flex;align-items:center;gap:8px;}
+.rule-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 16px;margin-bottom:8px;font-size:14px;color:#ded7ef;}
+
+.stack{display:flex;flex-direction:column;gap:12px;}
+.between{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+
+.modal-backdrop{position:fixed;inset:0;background:rgba(10,7,16,.65);backdrop-filter:blur(3px);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px;max-width:440px;width:100%;box-shadow:var(--shadow);}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--surface-2);border:1px solid var(--accent);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;z-index:200;box-shadow:var(--shadow);}
+
+.sidebar-admin{display:grid;grid-template-columns:220px 1fr;gap:22px;}
+@media(max-width:800px){.sidebar-admin{grid-template-columns:1fr;}}
+.side-nav{display:flex;flex-direction:column;gap:2px;}
+.side-nav a{padding:10px 14px;border-radius:9px;color:var(--muted);font-size:14px;}
+.side-nav a.active,.side-nav a:hover{background:var(--surface);color:var(--text);}
+.stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+@media(max-width:800px){.stat-cards{grid-template-columns:repeat(2,1fr);}}
+.linked-flag{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.35);border-radius:10px;padding:12px 14px;font-size:13px;color:#fca5a5;margin-top:8px;}
+.audit-item{padding:11px 0;border-bottom:1px solid var(--border);font-size:13.5px;display:flex;gap:10px;}
+.audit-item .t{color:var(--muted-2);font-size:12px;white-space:nowrap;}
+.chip-small{background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:11.5px;color:var(--muted);}
+.notice{background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.3);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--accent-2);}
+
+/* ===== added: accordion (rules) ===== */
+.accordion{display:flex;flex-direction:column;gap:10px;}
+.acc-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.acc-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;cursor:pointer;font-weight:700;font-size:15px;}
+.acc-head:hover{background:var(--surface-2);}
+.acc-head-left{display:flex;align-items:center;gap:10px;}
+.acc-count{font-size:12px;color:var(--muted);font-weight:400;}
+.acc-chevron{transition:transform .2s;color:var(--muted);}
+.acc-item.open .acc-chevron{transform:rotate(180deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.acc-item.open .acc-body{max-height:3000px;}
+.acc-body-inner{padding:0 18px 16px;}
+.acc-rule{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--border);font-size:14px;color:#ded7ef;}
+.acc-rule:first-child{border-top:none;}
+.acc-rule .num{color:var(--accent-2);font-weight:800;min-width:22px;}
+
+/* ===== added: role & link badges ===== */
+.role-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:14px;font-size:11.5px;font-weight:700;}
+.role-user{background:rgba(168,155,196,.15);color:var(--muted);}
+.role-staff{background:rgba(139,92,246,.16);color:var(--accent-2);}
+.role-admin{background:rgba(251,191,36,.15);color:var(--orange);}
+.link-yes{color:var(--green);font-weight:700;}
+.link-no{color:var(--red);font-weight:700;}
+
+/* ===== added: discord embed preview (mock) ===== */
+.embed-card{background:#1a1626;border-inline-start:4px solid var(--accent);border-radius:10px;padding:16px 18px;font-size:13.5px;max-width:440px;}
+.embed-title{font-weight:800;margin-bottom:12px;font-size:14.5px;}
+.embed-row{display:flex;gap:8px;margin-bottom:9px;}
+.embed-label{color:var(--muted);min-width:120px;flex-shrink:0;}
+
+/* ===== added: search / admin small forms ===== */
+.search-box{display:flex;gap:10px;margin-bottom:18px;}
+.search-box input{flex:1;}
+.mini-form{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.mini-form input{flex:1;min-width:140px;}
+.icon-btn{background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:6px 9px;font-size:12px;color:var(--muted);}
+.icon-btn:hover{color:var(--text);}
+.result-item{background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;cursor:pointer;}
+.result-item:hover{border-color:var(--accent);}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:640px){.settings-grid{grid-template-columns:1fr;}}
+.disabled-note{font-size:12px;color:var(--muted-2);margin-top:4px;}
+.event-row{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);font-size:13px;flex-wrap:wrap;}
+.event-row:last-child{border-bottom:none;}
+
+</style>
+<body>
+<div id="app"></div>
+<script>
+/* =========================================================
+   WL EMERGENCY — Stage 1: REAL backend wiring
+   - Registration / Login / Sessions -> REAL (server.js + data.json)
+   - Account linking (Discord/Roblox) -> REAL persistence, mock values
+     (actual Discord/Roblox OAuth comes later)
+   - Admin "السجلات" (records) + stats -> REAL, reads live data
+   - Rules / Streams / News / Community / Activation Test ->
+     UNCHANGED, still local/mock (on purpose — next stages)
+   ========================================================= */
+
+/* ---------------- tiny fetch wrapper ---------------- */
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    ...opts
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'حدث خطأ غير متوقع');
+  return data;
+}
+
+/* ================= STATE ================= */
+const STATE = {
+  route: "home",
+  currentUser: null,
+  mobileMenuOpen: false,
+  authTab: "login",
+  profileTab: "overview",
+  adminTab: "overview",
+  openRuleSections: { gen: true },
+  testState: null,
+  timerHandle: null,
+  toast: null,
+  searchQuery: "",
+  searchResults: [],
+  recordsView: null,   // {user, activity}
+  editingRule: null,
+  adminStats: null,
+  serverActivity: [],
+  localTestAttempts: {},   // wlId -> [] (client-only, not persisted yet)
+  localActivity: {},       // wlId -> [] (client-only test events, not persisted yet)
+  showLogoutConfirm: false,
+  securityLogs: []
+};
+
+function toast(msg) { STATE.toast = msg; render(); setTimeout(() => { STATE.toast = null; render(); }, 2600); }
+
+function navigate(route) {
+  if (route === 'admin' && !canAccessAdmin(STATE.currentUser)) { toast('هذا القسم للطاقم والإدارة فقط'); route = 'home'; }
+  STATE.route = route; STATE.mobileMenuOpen = false;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  render();
+  if (route === 'admin' && STATE.adminTab === 'overview') loadAdminStats();
+  if (route === 'profile' && STATE.profileTab === 'activity') loadMyActivity();
+}
+function setProfileTab(t) { STATE.profileTab = t; render(); if (t === 'activity') loadMyActivity(); }
+function setAdminTab(t) { STATE.adminTab = t; STATE.recordsView = null; render(); if (t === 'overview') loadAdminStats(); if (t === 'logs') loadAdminLogs(); }
+async function loadAdminLogs() {
+  try { const { logs } = await api('/api/admin/logs'); STATE.securityLogs = logs; } catch (e) { STATE.securityLogs = []; toast(e.message); }
+  render();
+}
+function toggleRuleSection(id) { STATE.openRuleSections[id] = !STATE.openRuleSections[id]; render(); }
+function canAccessAdmin(u) { return !!u && (u.role === 'staff' || u.role === 'admin'); }
+function canManage(u) { return !!u && u.role === 'admin'; }
+function roleBadge(role) {
+  const map = { user: ['مستخدم', 'role-user'], staff: ['طاقم', 'role-staff'], admin: ['إدارة/Owner', 'role-admin'] };
+  const m = map[role] || map.user;
+  return `<span class="role-badge ${m[1]}">${m[0]}</span>`;
+}
+function linkBadge(linked) { return linked ? '<span class="link-yes">✅ مرتبط</span>' : '<span class="link-no">❌ غير مرتبط</span>'; }
+function fmtTime(s) { const m = Math.floor(s / 60), sec = s % 60; return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`; }
+
+/* ================= AUTH (REAL) ================= */
+async function restoreSession() {
+  try { const { user } = await api('/api/me'); if (user) STATE.currentUser = user; }
+  catch (e) { /* not logged in */ }
+  render();
+}
+async function doRegister() {
+  const username = document.getElementById('reg-username').value.trim();
+  const password = document.getElementById('reg-password').value;
+  if (!username || password.length < 4) { toast('اكتب اسم مستخدم وكلمة مرور 4 أحرف فأكثر'); return; }
+  try {
+    const { user } = await api('/api/register', { method: 'POST', body: JSON.stringify({ username, password }) });
+    STATE.currentUser = user;
+    toast(user.role === 'admin' ? '🎉 تم إنشاء أول حساب في الموقع — أنت الآن Owner/Admin' : 'تم إنشاء الحساب بنجاح');
+    navigate('profile');
+  } catch (e) { toast(e.message); }
+}
+async function doLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  try {
+    const { user } = await api('/api/login', { method: 'POST', body: JSON.stringify({ username, password }) });
+    STATE.currentUser = user;
+    toast('تم تسجيل الدخول');
+    navigate('profile');
+  } catch (e) { toast(e.message); }
+}
+async function doLogout() {
+  try { await api('/api/logout', { method: 'POST' }); } catch (e) {}
+  STATE.currentUser = null;
+  STATE.showLogoutConfirm = false;
+  navigate('home');
+}
+function askLogout() { STATE.showLogoutConfirm = true; render(); }
+function cancelLogout() { STATE.showLogoutConfirm = false; render(); }
+function setAuthTab(t) { STATE.authTab = t; render(); }
+
+/* ================= LINKING — REAL Discord/Roblox OAuth =================
+   The buttons in the UI are plain links to /auth/discord/start and
+   /auth/roblox/start (handled by server.js). If the server owner hasn't
+   configured DISCORD_CLIENT_ID / ROBLOX_CLIENT_ID yet, the user sees a
+   friendly "setup needed" page instead of a broken flow. */
+async function unlinkAccount(which) {
+  try { const { user } = await api('/api/unlink/' + which, { method: 'POST' }); STATE.currentUser = user; render(); }
+  catch (e) { toast(e.message); }
+}
+async function loadMyActivity() {
+  if (!STATE.currentUser) return;
+  try { const { activity } = await api('/api/my/activity'); STATE.serverActivity = activity; render(); }
+  catch (e) { /* ignore */ }
+}
+
+/* ================= ADMIN (REAL records + stats) ================= */
+async function loadAdminStats() {
+  try { STATE.adminStats = await api('/api/admin/stats'); } catch (e) { STATE.adminStats = null; }
+  render();
+}
+async function runSearch() {
+  const q = document.getElementById('records-search-input').value;
+  STATE.searchQuery = q; STATE.recordsView = null;
+  try { const { results } = await api('/api/admin/users?q=' + encodeURIComponent(q)); STATE.searchResults = results; }
+  catch (e) { toast(e.message); }
+  render();
+}
+async function openUserRecord(wlId) {
+  try { const data = await api('/api/admin/users/' + wlId); STATE.recordsView = data; render(); }
+  catch (e) { toast(e.message); }
+}
+function closeUserRecord() { STATE.recordsView = null; render(); }
+async function changeUserRole(wlId, role) {
+  try {
+    await api('/api/admin/users/' + wlId + '/role', { method: 'POST', body: JSON.stringify({ role }) });
+    toast('تم تحديث الصلاحية');
+    openUserRecord(wlId);
+  } catch (e) { toast(e.message); }
+}
+
+/* ================= ACTIVATION TEST (still local/mock — next stage) ================= */
+const QUIZ_BANK = (() => {
+  const bank = [
+    ["ما هو أول إجراء يجب اتخاذه عند وصولك لموقع حادث سير؟","تأمين الموقع وتنبيه المرور","مغادرة الموقع فورًا","الاتصال بالإعلام","تجاهل الموقف"],
+    ["ما معنى الكود 10-4 في الاتصالات؟","تم الاستلام / مفهوم","طلب دعم فوري","إنهاء المهمة","خطر داهم"],
+    ["متى يجوز استخدام الأضواء والصفارة معًا؟","في حالات الطوارئ الفعلية فقط","في كل الأوقات","عند الرغبة الشخصية","عند التنقل بين المراكز"],
+    ["ما هو دور فريق الإسعاف الأساسي في المشهد؟","تقييم الحالة وتقديم الإسعافات الأولية","تنظيم حركة المرور","توثيق الأدلة الجنائية","اعتقال المتورطين"],
+    ["كيف يتم التعامل مع مستخدم يخالف قوانين الدور بشكل متكرر؟","توثيق المخالفة ورفعها للإدارة","تجاهلها","الرد بالمثل","طرده من السيرفر شخصيًا"],
+    ["ما هو الغرض من اختبار التفعيل الإلكتروني؟","التأكد من فهم العضو لقوانين وآلية اللعب","تعقيد التسجيل","تقليل عدد اللاعبين","لا يوجد غرض محدد"],
+    ["أين تتم عملية منح رتبة التفعيل النهائية؟","عبر Discord Bot بعد اجتياز الاختبار","من داخل الموقع مباشرة","لا تُمنح إطلاقًا","عشوائيًا"],
+    ["ما الإجراء الصحيح عند وجود شكوى على عضو؟","التواصل مع الإدارة عبر Discord","نشرها في الدردشة العامة","تجاهلها","الرد شخصيًا بعقوبة"],
+    ["ما هي أهم صفة يجب توفرها في أعضاء قطاع الطوارئ؟","الالتزام والجدية أثناء الأدوار","السرعة في القيادة فقط","كثرة الظهور فقط","لا شيء محدد"],
+    ["ما الهدف من ربط حساب Roblox و Discord بحساب WL؟","توحيد هوية العضو وتسهيل التحقق من سجله","تعقيد الدخول للموقع","لا يوجد هدف","جمع بيانات دون فائدة"],
+    ["ما الذي يحدث عند اجتياز اختبار التفعيل بنجاح؟","إرسال حدث لمنح رتبة Discord تلقائيًا لاحقًا","تفعيل الحساب فورًا من الموقع","لا شيء","حظر الحساب"],
+    ["كيف يتم التعرف على الحساب بدقة بدلًا من الاسم الظاهر؟","الاعتماد على المعرفات الفريدة (IDs)","الاعتماد على اسم المستخدم الظاهر فقط","تخمين الشخص من الصورة","لا يمكن التعرف عليه"],
+    ["ما هو أفضل وصف لدور 'قطاعات' الطوارئ؟","فرق متخصصة كالإسعاف والإطفاء والشرطة","مجموعة عشوائية من الأعضاء","صناع محتوى فقط","إداريون فقط"],
+    ["ماذا يحدث إذا رسب العضو في اختبار التفعيل؟","يمكنه مراجعة القوانين وإعادة المحاولة لاحقًا","يُحظر تلقائيًا","يفقد حسابه نهائيًا","لا يحدث شيء"],
+    ["أين تُسجَّل نتيجة اختبار التفعيل (نجاح أو رسوب)؟","تُرسل كسجل Embed إلى قناة السجلات في Discord","لا تُسجَّل في أي مكان","تُنشر للعامة في المجتمع","تُحذف فورًا"],
+    ["من الجهة المسؤولة عن فتح وإغلاق التفعيل وترتيب الأدوار؟","Discord Bot خارج نطاق الموقع","الموقع مباشرة","لا جهة مسؤولة","صناع المحتوى"],
+    ["ما هو دور قسم 'السجلات' في لوحة الإدارة؟","البحث عن أي عضو بمعرفاته ومعرفة بياناته الكاملة","نشر الأخبار","إدارة البثوث فقط","لا دور له"],
+    ["لماذا لا يُسمح للمستخدم العادي بدخول قسم السجلات؟","لأنه يحتوي على بيانات حساسة تخص الأعضاء الآخرين","لأنه غير موجود أصلًا","لأنه مخصص لصناع المحتوى","لا سبب"],
+    ["ما أفضل وصف لمرحلة 'Prototype' الحالية للموقع؟","نموذج تجريبي بواجهة كاملة وبيانات وهمية دون ربط حقيقي","نسخة نهائية جاهزة للاستخدام الفعلي","لعبة مستقلة عن المشروع","تطبيق جوال منفصل"],
+    ["ما هو الدور الأساسي لصناع المحتوى في المجتمع؟","نشر وتوثيق تجربة اللعب بشكل إيجابي","إصدار القرارات الإدارية","تحديد قوانين السيرفر","منح رتب التفعيل"]
+  ];
+  return bank.map((row, i) => {
+    const shift = i % (row.length - 1);
+    let opts = row.slice(1);
+    for (let s = 0; s < shift; s++) { opts.push(opts.shift()); }
+    const correct = (0 - shift + opts.length) % opts.length;
+    return { id: i + 1, q: row[0], options: opts, correct };
+  });
+})();
+let ADMIN_SETTINGS = { numQuestions: 10, passPercent: 80, testDurationMinutes: 15, discordRoleName: "عضو مفعل", logChannelName: "#activation-logs" };
+let EVENT_QUEUE = [];
+
+function startTest() {
+  const u = STATE.currentUser; if (!u) { toast("سجّل الدخول أولاً"); return; }
+  if (!u.discordLinked || !u.robloxLinked) { toast('اربط Discord و Roblox أولًا'); return; }
+  const n = Math.min(ADMIN_SETTINGS.numQuestions, QUIZ_BANK.length);
+  STATE.testState = { questions: QUIZ_BANK.slice(0, n), answers: new Array(n).fill(null), submitted: false, result: null, timeLeft: ADMIN_SETTINGS.testDurationMinutes * 60 };
+  clearInterval(STATE.timerHandle);
+  STATE.timerHandle = setInterval(() => {
+    if (!STATE.testState || STATE.testState.submitted) { clearInterval(STATE.timerHandle); return; }
+    STATE.testState.timeLeft--;
+    if (STATE.testState.timeLeft <= 0) finishTest(); else renderTimerOnly();
+  }, 1000);
+  render();
+}
+function selectAnswer(qIdx, optIdx) { if (!STATE.testState || STATE.testState.submitted) return; STATE.testState.answers[qIdx] = optIdx; render(); }
+function finishTest() {
+  const ts = STATE.testState, u = STATE.currentUser;
+  if (!ts || ts.submitted) return;
+  clearInterval(STATE.timerHandle);
+  let correct = 0;
+  ts.questions.forEach((q, i) => { if (ts.answers[i] === q.correct) correct++; });
+  const total = ts.questions.length;
+  const percent = Math.round((correct / total) * 100);
+  const passed = percent >= ADMIN_SETTINGS.passPercent;
+  const attempt = { date: new Date().toISOString().slice(0, 16).replace('T', ' '), score: correct, total, percent, passed };
+  if (!STATE.localTestAttempts[u.wlId]) STATE.localTestAttempts[u.wlId] = [];
+  STATE.localTestAttempts[u.wlId].unshift(attempt);
+  ts.submitted = true; ts.result = attempt;
+  const embedEvent = { id: "EVT-" + Math.floor(Math.random() * 90000 + 10000), channel: ADMIN_SETTINGS.logChannelName, payload: { title: "اختبار التفعيل الإلكتروني", المستخدم: u.username, Roblox: `${u.robloxUsername} (${u.robloxId})`, Discord: `${u.discordUsername} (${u.discordId})`, النتيجة: `${attempt.score} / ${attempt.total}`, النسبة: `${attempt.percent}%`, الحالة: passed ? "✅ ناجح" : "🔴 راسب", الوقت: attempt.date } };
+  EVENT_QUEUE.unshift(embedEvent);
+  ts.embedEvent = embedEvent;
+  render();
+}
+function renderTimerOnly() { const el = document.getElementById('timer-val'); if (el && STATE.testState) el.textContent = fmtTime(STATE.testState.timeLeft); }
+function embedPreview(ev) {
+  if (!ev) return '';
+  const p = ev.payload;
+  return `<div class="embed-card">
+    <div class="embed-title">📋 ${p.title}</div>
+    <div class="embed-row"><span class="embed-label">👤 المستخدم</span><b>${p['المستخدم']}</b></div>
+    <div class="embed-row"><span class="embed-label">🎮 Roblox</span><b>${p['Roblox']}</b></div>
+    <div class="embed-row"><span class="embed-label">💬 Discord</span><b>${p['Discord']}</b></div>
+    <div class="embed-row"><span class="embed-label">📊 النتيجة</span><b>${p['النتيجة']}</b></div>
+    <div class="embed-row"><span class="embed-label">📈 النسبة</span><b>${p['النسبة']}</b></div>
+    <div class="embed-row"><span class="embed-label">الحالة</span><b>${p['الحالة']}</b></div>
+    <div class="embed-row"><span class="embed-label">🕐 الوقت</span><b>${p['الوقت']}</b></div>
+    <div style="font-size:11.5px;color:var(--muted-2);margin-top:6px;">معاينة فقط — سيُرسل فعليًا إلى ${ev.channel} عبر Discord Bot لاحقًا. (نتائج الاختبار غير محفوظة في قاعدة البيانات بعد.)</div>
+  </div>`;
+}
+
+/* ================= RULES (local — unchanged) ================= */
+let RULES = [
+  { id: "gen", icon: "👤", title: "القوانين العامة", rules: ["احترام جميع الأعضاء والطاقم الإداري.", "يمنع استخدام أي وسيلة غش أو استغلال أخطاء برمجية.", "الالتزام بالهوية داخل الأدوار (Roleplay) طوال فترة اللعب.", "يمنع مشاركة الحساب مع أي شخص آخر."] },
+  { id: "police", icon: "🚔", title: "قوانين الشرطة", rules: ["الالتزام بالزي الرسمي أثناء الخدمة.", "استخدام القوة يكون تدريجيًا وحسب الموقف.", "التنسيق مع باقي القطاعات عند الحوادث المشتركة.", "توثيق كل عملية اعتقال داخل التقرير الرسمي."] },
+  { id: "ems", icon: "🚑", title: "قوانين الإسعاف", rules: ["إعطاء الأولوية للحالات الحرجة أولًا.", "عدم مغادرة موقع الحادث قبل تأمين المصاب.", "التواصل الواضح مع فريق الشرطة عند الحاجة لتأمين الموقع."] },
+  { id: "taxi", icon: "🚕", title: "قوانين التاكسي", rules: ["الالتزام بقوانين المرور أثناء نقل الركاب.", "عدم رفض الركاب دون سبب منطقي داخل الدور.", "الحفاظ على سلوك احترافي مع جميع الركاب."] }
+];
+function addRuleSection() {
+  const title = document.getElementById('new-section-title').value.trim();
+  const icon = document.getElementById('new-section-icon').value.trim() || '📌';
+  if (!title) { toast('اكتب اسم القسم'); return; }
+  RULES.push({ id: 'sec-' + Date.now(), icon, title, rules: [] });
+  render();
+}
+function deleteRuleSection(id) { RULES = RULES.filter(s => s.id !== id); render(); }
+function moveSection(id, dir) { const i = RULES.findIndex(s => s.id === id), j = i + dir; if (j < 0 || j >= RULES.length) return; [RULES[i], RULES[j]] = [RULES[j], RULES[i]]; render(); }
+function addRuleToSection(sectionId) { const input = document.getElementById('new-rule-' + sectionId); const text = input.value.trim(); if (!text) return; RULES.find(s => s.id === sectionId).rules.push(text); input.value = ''; render(); }
+function deleteRule(sectionId, idx) { RULES.find(s => s.id === sectionId).rules.splice(idx, 1); render(); }
+function moveRule(sectionId, idx, dir) { const sec = RULES.find(s => s.id === sectionId); const j = idx + dir; if (j < 0 || j >= sec.rules.length) return; [sec.rules[idx], sec.rules[j]] = [sec.rules[j], sec.rules[idx]]; render(); }
+function editRule(sectionId, idx) { STATE.editingRule = { sectionId, idx }; render(); }
+function saveRuleEdit(sectionId, idx) { const val = document.getElementById('edit-rule-input').value.trim(); if (val) RULES.find(s => s.id === sectionId).rules[idx] = val; STATE.editingRule = null; render(); }
+function saveSettings() {
+  const n = parseInt(document.getElementById('set-numq').value, 10);
+  const p = parseInt(document.getElementById('set-pass').value, 10);
+  const role = document.getElementById('set-role').value.trim();
+  const channel = document.getElementById('set-channel').value.trim();
+  if (n > 0 && n <= QUIZ_BANK.length) ADMIN_SETTINGS.numQuestions = n;
+  if (p >= 0 && p <= 100) ADMIN_SETTINGS.passPercent = p;
+  if (role) ADMIN_SETTINGS.discordRoleName = role;
+  if (channel) ADMIN_SETTINGS.logChannelName = channel;
+  toast('تم حفظ الإعدادات'); render();
+}
+
+/* ================= UI / COMPONENTS ================= */
+function navItem(route, label) { return `<a href="#" onclick="navigate('${route}');return false;" class="${STATE.route === route ? 'active' : ''}">${label}</a>`; }
+function topbar() {
+  const links = [['home', 'الرئيسية'], ['news', 'الأخبار'], ['rules', 'القوانين'], ['streams', 'البثوث'], ['community', 'المجتمع'], ['test', 'اختبار التفعيل']];
+  const u = STATE.currentUser;
+  const userArea = u
+    ? `<div class="user-chip" onclick="navigate('profile')"><div class="av">${u.username[0]}</div><span style="font-size:13.5px;">${u.username}</span></div>
+       <button class="btn btn-ghost btn-sm" onclick="askLogout()">خروج</button>
+       ${canAccessAdmin(u) ? `<button class="btn btn-ghost btn-sm" onclick="navigate('admin')">لوحة الإدارة</button>` : ''}`
+    : `<button class="btn btn-primary btn-sm" onclick="navigate('login')">تسجيل الدخول</button>`;
+  return `<div class="topbar"><div class="container topbar-inner">
+      <div class="brand" style="cursor:pointer" onclick="navigate('home')"><div class="brand-mark">WL</div><div>WL Emergency<small>Roleplay Community</small></div></div>
+      <div class="nav-links">${links.map(l => navItem(l[0], l[1])).join('')}</div>
+      <div class="nav-cta">${userArea}<button class="hamburger" onclick="STATE.mobileMenuOpen=!STATE.mobileMenuOpen;render();">☰</button></div>
+    </div>
+    <div class="mobile-menu ${STATE.mobileMenuOpen ? 'open' : ''}">${links.map(l => navItem(l[0], l[1])).join('')}${u ? navItem('profile', 'ملفي الشخصي') : ''}${canAccessAdmin(u) ? navItem('admin', 'لوحة الإدارة') : ''}</div>
+  </div>`;
+}
+function footer() {
+  return `<footer><div class="container footer-inner">
+    <div>© 2026 WL Emergency — حسابات وتسجيل دخول حقيقيان الآن. التفعيل النهائي سيبقى عبر Discord Bot.</div>
+    <div style="display:flex;gap:14px;"><a href="#discord-mock" style="color:var(--accent-2)">Discord ↗</a><a href="#" onclick="navigate('rules');return false;">القوانين</a><a href="#" onclick="navigate('community');return false;">المجتمع</a></div>
+  </div></footer>`;
+}
+function quickCard(icon, title, desc, route) { return `<div class="qcard" style="cursor:pointer" onclick="navigate('${route}')"><div class="qi">${icon}</div><h3>${title}</h3><p>${desc}</p></div>`; }
+function emptyState(icon, title, sub) { return `<div class="empty"><div class="ei">${icon}</div><div style="font-weight:700;color:var(--text);">${title}</div><div style="font-size:13px;">${sub}</div></div>`; }
+
+/* ---- HOME ---- */
+function pageHome() {
+  return `<section class="hero"><div class="container hero-grid">
+      <div>
+        <h1>هنا مبدأ<br><span>العز والإحترام.</span></h1>
+        <p>WL Emergency مجتمع Roblox RP متخصص في محاكاة قطاعات الطوارئ. أنشئ حسابك، اربط Discord و Roblox، واجتز اختبار التفعيل الإلكتروني.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" onclick="toast('سيتم فتح Roblox عند الربط الفعلي لاحقًا')">العب الآن</button>
+          <button class="btn btn-ghost" onclick="navigate('${STATE.currentUser ? 'profile' : 'login'}')">${STATE.currentUser ? 'ملفي الشخصي' : 'تسجيل الدخول'}</button>
+        </div>
+      </div>
+      <div class="hero-panel">
+        <div class="hero-banner"><div class="bmark">WL EMERGENCY</div></div>
+        <div class="stat-row"><span class="label">حالة السيرفر</span><span class="badge badge-green">🟢 متصل</span></div>
+        <div class="stat-row"><span class="label">عدد اللاعبين</span><b>47 / 80</b></div>
+        <div class="stat-row"><span class="label">Discord</span><a href="#discord-mock" style="color:var(--accent-2)">انضم الآن ↗</a></div>
+      </div>
+  </div></section>
+  <section class="section"><div class="container">
+    <div class="section-head"><h2>أقسام الموقع</h2><p>كل ما تحتاجه في مكان واحد</p></div>
+    <div class="quick-grid">
+      ${quickCard('📰', 'الأخبار', 'آخر مستجدات المجتمع', 'news')}
+      ${quickCard('📜', 'القوانين', 'تعرف على قوانين السيرفر', 'rules')}
+      ${quickCard('🎬', 'البثوث', 'تابع صناع المحتوى الآن', 'streams')}
+      ${quickCard('🧠', 'اختبار التفعيل الإلكتروني', 'اربط حسابك واختبر معلوماتك', 'test')}
+      ${quickCard('🌐', 'المجتمع', 'روابط ومنصات المجتمع', 'community')}
+      ${quickCard('👤', 'حسابي', 'بياناتي ونتائج اختباراتي', 'profile')}
+    </div>
+  </div></section>`;
+}
+
+/* ---- LOGIN / REGISTER (REAL) ---- */
+function pageLogin() {
+  return `<section class="section"><div class="container" style="max-width:440px;">
+    <div class="card">
+      <div class="tabs">
+        <div class="tab ${STATE.authTab === 'login' ? 'active' : ''}" onclick="setAuthTab('login')">تسجيل الدخول</div>
+        <div class="tab ${STATE.authTab === 'register' ? 'active' : ''}" onclick="setAuthTab('register')">حساب جديد</div>
+      </div>
+      ${STATE.authTab === 'login' ? `
+        <div class="field"><label>اسم المستخدم</label><input id="login-username" placeholder="اسم المستخدم"></div>
+        <div class="field"><label>كلمة المرور</label><input id="login-password" type="password" placeholder="••••••••"></div>
+        <button class="btn btn-primary" style="width:100%;" onclick="doLogin()">دخول</button>
+      ` : `
+        <div class="notice" style="margin-bottom:16px;">أول شخص يسجّل حساب في هذا الموقع يصبح Owner/Admin تلقائيًا.</div>
+        <div class="field"><label>اسم المستخدم</label><input id="reg-username" placeholder="اختر اسم مستخدم"></div>
+        <div class="field"><label>كلمة المرور</label><input id="reg-password" type="password" placeholder="4 أحرف على الأقل"></div>
+        <button class="btn btn-primary" style="width:100%;" onclick="doRegister()">إنشاء الحساب</button>
+      `}
+    </div>
+  </div></section>`;
+}
+
+/* ---- PROFILE ---- */
+function pageProfile() {
+  const u = STATE.currentUser;
+  if (!u) return pageLogin();
+  const tabs = [['overview', 'الرئيسية'], ['linked', 'الحسابات المرتبطة'], ['test', 'اختبار التفعيل الإلكتروني'], ['activity', 'النشاطات']];
+  return `<section class="section"><div class="container">
+    <div class="profile-head">
+      <div class="profile-av">${u.username[0]}</div>
+      <div><div style="font-size:20px;font-weight:800;">${u.username}</div><div style="color:var(--muted);font-size:13px;">${u.wlId} · آخر تسجيل دخول: ${u.lastLogin}</div></div>
+      <div style="margin-inline-start:auto;display:flex;gap:8px;">
+        <div class="pill-status">Discord ${linkBadge(u.discordLinked)}</div>
+        <div class="pill-status">Roblox ${linkBadge(u.robloxLinked)}</div>
+      </div>
+    </div>
+    <div class="tabs">${tabs.map(t => `<div class="tab ${STATE.profileTab === t[0] ? 'active' : ''}" onclick="setProfileTab('${t[0]}')">${t[1]}</div>`).join('')}</div>
+    ${profileTabContent(u)}
+  </div></section>`;
+}
+function profileTabContent(u) {
+  if (STATE.profileTab === 'overview') {
+    const attempts = STATE.localTestAttempts[u.wlId] || [];
+    const best = attempts.reduce((a, c) => (!a || c.percent > a.percent) ? c : a, null);
+    return `<div class="grid-2">
+      <div class="card">
+        <h3 style="margin-top:0;">معلومات الحساب</h3>
+        <div class="stat-row"><span class="label">WL User ID</span><b>${u.wlId}</b></div>
+        <div class="stat-row"><span class="label">اسم المستخدم</span><b>${u.username}</b></div>
+        <div class="stat-row"><span class="label">تاريخ إنشاء الحساب</span><b>${u.createdAt}</b></div>
+        <div class="stat-row"><span class="label">آخر تسجيل دخول</span><b>${u.lastLogin}</b></div>
+        <div class="stat-row"><span class="label">Discord</span><b>${u.discordLinked ? u.discordUsername + ' (' + u.discordId + ')' : '—'}</b></div>
+        <div class="stat-row"><span class="label">Roblox</span><b>${u.robloxLinked ? u.robloxUsername + ' / ' + u.robloxDisplayName + ' (' + u.robloxId + ')' : '—'}</b></div>
+      </div>
+      <div class="stack">
+        <div class="stat-mini"><div class="n">${attempts.length}</div><div class="l">محاولات الاختبار (هذه الجلسة)</div></div>
+        <div class="stat-mini"><div class="n">${best ? best.percent + '%' : '—'}</div><div class="l">أفضل نتيجة</div></div>
+        <div class="stat-mini"><div class="n">${best && best.passed ? '✅' : '—'}</div><div class="l">اجتياز الاختبار</div></div>
+      </div>
+    </div>`;
+  }
+  if (STATE.profileTab === 'linked') {
+    return `<div class="grid-2">
+      <div class="card">
+        <h3 style="margin-top:0;">Discord</h3>
+        <div class="stat-row"><span class="label">الحالة</span>${linkBadge(u.discordLinked)}</div>
+        <div class="stat-row"><span class="label">Username</span><b>${u.discordUsername || '—'}</b></div>
+        <div class="stat-row"><span class="label">Discord ID</span><b>${u.discordId || '—'}</b></div>
+        ${u.discordLinked ? `<button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="unlinkAccount('discord')">إلغاء الربط</button>` : `<a class="btn btn-primary btn-sm" style="margin-top:10px;display:inline-block;" href="/auth/discord/start">ربط حساب Discord الحقيقي</a>`}
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0;">Roblox</h3>
+        <div class="stat-row"><span class="label">الحالة</span>${linkBadge(u.robloxLinked)}</div>
+        <div class="stat-row"><span class="label">Username</span><b>${u.robloxUsername || '—'}</b></div>
+        <div class="stat-row"><span class="label">Display Name</span><b>${u.robloxDisplayName || '—'}</b></div>
+        <div class="stat-row"><span class="label">Roblox ID</span><b>${u.robloxId || '—'}</b></div>
+        ${u.robloxLinked ? `<button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="unlinkAccount('roblox')">إلغاء الربط</button>` : `<a class="btn btn-primary btn-sm" style="margin-top:10px;display:inline-block;" href="/auth/roblox/start">ربط حساب Roblox الحقيقي</a>`}
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:12.5px;margin-top:14px;">الربط الآن حقيقي عبر Discord OAuth و Roblox OAuth. إذا صاحب الموقع ما ضاف بيانات اعتماد التطبيق بعد، بتشوف صفحة توضّح إنه الإعداد ناقص بدل ما يصير ربط وهمي.</p>`;
+  }
+  if (STATE.profileTab === 'test') return pageTestInner(u);
+  if (STATE.profileTab === 'activity') {
+    const log = STATE.serverActivity || [];
+    return `<div class="card"><h3 style="margin-top:0;">النشاطات</h3>
+      <p style="color:var(--muted);font-size:12.5px;margin-top:-8px;">مسحوبة الآن مباشرة من قاعدة البيانات الحقيقية.</p>
+      ${log.length ? log.map(a => `<div class="audit-item"><span class="t">${a.time}</span><span>${a.text}</span></div>`).join('') : emptyState('🕓', 'لا يوجد نشاط بعد', '')}
+    </div>`;
+  }
+  return '';
+}
+
+/* ---- ACTIVATION TEST ---- */
+function pageTest() { if (!STATE.currentUser) return pageLogin(); STATE.profileTab = 'test'; return pageProfile(); }
+function pageTestInner(u) {
+  if (!u.discordLinked || !u.robloxLinked) {
+    return `<div class="card" style="text-align:center;padding:36px 24px;">
+      <div style="font-size:30px;margin-bottom:10px;">🔗</div>
+      <h3 style="margin:0 0 8px;">أكمل ربط حساباتك أولًا</h3>
+      <p style="color:var(--muted);max-width:420px;margin:0 auto 18px;">يجب ربط حسابي Discord و Roblox قبل دخول اختبار التفعيل الإلكتروني.</p>
+      <button class="btn btn-primary btn-sm" onclick="setProfileTab('linked')">اذهب لربط الحسابات</button>
+    </div>`;
+  }
+  if (!STATE.testState) {
+    const attempts = STATE.localTestAttempts[u.wlId] || [];
+    const last = attempts[0];
+    return `<div class="card" style="text-align:center;padding:40px 24px;">
+      <div style="font-size:32px;margin-bottom:10px;">🧠</div>
+      <h3 style="margin:0 0 8px;">اختبار التفعيل الإلكتروني</h3>
+      <p style="color:var(--muted);max-width:440px;margin:0 auto 20px;">${ADMIN_SETTINGS.numQuestions} سؤال · مدة الاختبار ${ADMIN_SETTINGS.testDurationMinutes} دقيقة · نسبة النجاح ${ADMIN_SETTINGS.passPercent}%.</p>
+      ${last ? `<div class="notice" style="margin-bottom:16px;">آخر محاولة: ${last.score}/${last.total} (${last.percent}%) — ${last.passed ? 'ناجح ✅' : 'راسب 🔴'}</div>` : ''}
+      <button class="btn btn-primary" onclick="startTest()">${last ? 'إعادة الاختبار' : 'ابدأ الاختبار'}</button>
+      <div class="disabled-note" style="margin-top:14px;">ملاحظة: نتائج الاختبار غير محفوظة في قاعدة البيانات بعد (المرحلة القادمة).</div>
+    </div>`;
+  }
+  const ts = STATE.testState;
+  if (ts.submitted) {
+    const r = ts.result;
+    return `<div class="grid-2">
+      <div class="card" style="text-align:center;padding:34px 20px;">
+        <div style="font-size:34px;">${r.passed ? '✅' : '🔴'}</div>
+        <h3 style="margin:10px 0 4px;">النتيجة: ${r.score} / ${r.total}</h3>
+        <div style="font-size:26px;font-weight:800;font-family:'Almarai',sans-serif;color:${r.passed ? 'var(--green)' : 'var(--red)'};">${r.percent}%</div>
+        <div style="margin:10px 0;">${r.passed ? '<span class="badge badge-green">🟢 ناجح</span>' : '<span class="badge badge-red">🔴 راسب</span>'}</div>
+      </div>
+      <div><div style="font-size:13px;color:var(--muted);margin-bottom:8px;">معاينة Embed (محاكاة)</div>${embedPreview(ts.embedEvent)}</div>
+    </div>`;
+  }
+  return `<div class="grid-2">
+    <div class="stack">
+      ${ts.questions.map((q, i) => `<div class="q-block"><div style="font-weight:700;margin-bottom:8px;">${i + 1}. ${q.q}</div>${q.options.map((op, oi) => `<div class="q-opt ${ts.answers[i] === oi ? 'sel' : ''}" onclick="selectAnswer(${i},${oi})"><span>${ts.answers[i] === oi ? '●' : '○'}</span><span>${op}</span></div>`).join('')}</div>`).join('')}
+      <button class="btn btn-primary" style="align-self:flex-start;" onclick="finishTest()">إرسال الاختبار</button>
+    </div>
+    <div><div class="timer-box"><div style="font-size:12.5px;color:var(--muted);margin-bottom:6px;">الوقت المتبقي</div><div class="tv" id="timer-val">${fmtTime(ts.timeLeft)}</div><div style="font-size:12px;color:var(--muted-2);margin-top:6px;">${ts.answers.filter(a => a !== null).length} / ${ts.questions.length} تمت الإجابة</div></div></div>
+  </div>`;
+}
+
+/* ---- STREAMS / NEWS / COMMUNITY ---- */
+const STREAMS = [{ name: "Fahad_RP", platform: "YouTube", live: true, title: "دورية ليلية مع فريق الإسعاف" }, { name: "NoraStreams", platform: "Twitch", live: true, title: "يوم في قسم الشرطة" }, { name: "KhalidGG", platform: "TikTok", live: false, title: "أبرز لحظات الأسبوع" }, { name: "RimasLive", platform: "Kick", live: false, title: "جولة تعريفية بالمركز الرئيسي" }];
+const NEWS = [{ title: "تفعيل نظام الحسابات الحقيقية", date: "2026-09-08", author: "إدارة WL Emergency", content: "الموقع الآن يستخدم تسجيل دخول وحسابات حقيقية بدل البيانات الوهمية." }, { title: "إطلاق اختبار التفعيل الإلكتروني الجديد", date: "2026-09-01", author: "إدارة WL Emergency", content: "الاختبار الآن إلكتروني بالكامل، ونتائجه ستُرسل تلقائيًا كسجل إلى Discord قريبًا." }, { title: "تحديث قوانين قطاع الشرطة", date: "2026-08-11", author: "قسم القطاعات", content: "إضافة بنود جديدة تنظم آلية التعامل مع الحوادث المتعددة." }];
+function pageStreams() { return `<section class="section"><div class="container"><div class="section-head"><h2>البثوث</h2><p>بيانات وهمية — الربط الفعلي لاحقًا</p></div><div class="grid-3">${STREAMS.map(s => `<div class="stream-card"><div class="thumb">${s.live ? '<div class="live-tag">● مباشر</div>' : ''}🎥</div><div style="padding:16px;"><div class="between"><b>${s.name}</b><span class="chip-small">${s.platform}</span></div><div style="color:var(--muted);font-size:13px;margin:8px 0 14px;">${s.title}</div><button class="btn ${s.live ? 'btn-primary' : 'btn-ghost'} btn-sm" style="width:100%;" onclick="toast('سيتم فتح البث عند الربط الفعلي')">${s.live ? 'شاهد الآن' : 'غير متصل'}</button></div></div>`).join('')}</div></div></section>`; }
+function pageNews() { return `<section class="section"><div class="container"><div class="section-head"><h2>الأخبار</h2><p>آخر تحديثات المجتمع</p></div><div class="grid-3">${NEWS.map(n => `<div class="news-card"><div class="thumb">📰</div><div style="padding:16px;"><b>${n.title}</b><div style="color:var(--muted-2);font-size:12px;margin:6px 0 10px;">${n.date} · ${n.author}</div><div style="color:#ded7ef;font-size:13.5px;">${n.content}</div></div></div>`).join('')}</div></div></section>`; }
+function pageCommunity() { return `<section class="section"><div class="container"><div class="section-head"><h2>المجتمع</h2><p>كل روابط ومنصات WL Emergency في مكان واحد</p></div><div class="quick-grid">${quickCard('💬', 'Discord الرسمي', 'انضم لمجتمعنا على Discord', 'community')}${quickCard('🎬', 'صناع المحتوى', 'تابع صناع المحتوى المعتمدين', 'streams')}${quickCard('📺', 'البثوث المباشرة', 'شاهد من يبث الآن', 'streams')}${quickCard('📰', 'الأخبار والإعلانات', 'آخر مستجدات المجتمع', 'news')}</div></div></section>`; }
+
+/* ---- RULES (accordion) ---- */
+function pageRules() {
+  return `<section class="section"><div class="container" style="max-width:780px;">
+    <div class="section-head"><h2>القوانين</h2><p>اضغط على أي قسم لعرض قوانينه</p></div>
+    <div class="accordion">${RULES.map(sec => `
+      <div class="acc-item ${STATE.openRuleSections[sec.id] ? 'open' : ''}">
+        <div class="acc-head" onclick="toggleRuleSection('${sec.id}')"><div class="acc-head-left"><span>${sec.icon}</span><span>${sec.title}</span><span class="acc-count">(${sec.rules.length})</span></div><span class="acc-chevron">▾</span></div>
+        <div class="acc-body"><div class="acc-body-inner">${sec.rules.length ? sec.rules.map((r, i) => `<div class="acc-rule"><span class="num">${i + 1}.</span><span>${r}</span></div>`).join('') : `<div style="color:var(--muted);font-size:13px;padding:10px 0;">لا توجد قوانين مضافة بعد.</div>`}</div></div>
+      </div>`).join('')}</div>
+  </div></section>`;
+}
+
+/* ---- ADMIN ---- */
+function pageAdmin() {
+  const u = STATE.currentUser;
+  if (!canAccessAdmin(u)) return pageLogin();
+  const isAdmin = canManage(u);
+  const tabs = [['overview', 'نظرة عامة'], ['records', 'السجلات']];
+  if (isAdmin) tabs.push(['rules', 'إدارة القوانين'], ['settings', 'إعدادات الاختبار'], ['logs', 'سجل الأمان']);
+  return `<section class="section"><div class="container">
+    <div class="section-head"><h2>لوحة الإدارة</h2><p>مسجّل دخول كـ ${u.username} ${roleBadge(u.role)}</p></div>
+    <div class="sidebar-admin">
+      <div class="side-nav">${tabs.map(t => `<a href="#" class="${STATE.adminTab === t[0] ? 'active' : ''}" onclick="setAdminTab('${t[0]}');return false;">${t[1]}</a>`).join('')}</div>
+      <div>${adminTabContent(isAdmin)}</div>
+    </div>
+  </div></section>`;
+}
+function adminTabContent(isAdmin) {
+  if (STATE.adminTab === 'overview') {
+    const s = STATE.adminStats;
+    if (!s) return emptyState('⏳', 'جاري التحميل...', '');
+    return `<div class="stat-cards">
+      <div class="stat-mini"><div class="n">${s.total}</div><div class="l">إجمالي المستخدمين</div></div>
+      <div class="stat-mini"><div class="n">${s.discordLinked}</div><div class="l">مرتبطون بـ Discord</div></div>
+      <div class="stat-mini"><div class="n">${s.robloxLinked}</div><div class="l">مرتبطون بـ Roblox</div></div>
+      <div class="stat-mini"><div class="n">${s.staff + s.admins}</div><div class="l">طاقم وإدارة</div></div>
+    </div>
+    <div class="card"><h3 style="margin-top:0;">آخر المستخدمين المسجلين</h3>
+      <div class="table-wrap"><table><thead><tr><th>المستخدم</th><th>WL ID</th><th>الصلاحية</th><th>Discord</th><th>Roblox</th><th>تاريخ التسجيل</th></tr></thead><tbody>
+      ${s.latest.map(u2 => `<tr><td onclick="setAdminTab('records');openUserRecord('${u2.wlId}')" style="cursor:pointer;color:var(--accent-2);">${u2.username}</td><td>${u2.wlId}</td><td>${roleBadge(u2.role)}</td><td>${linkBadge(u2.discordLinked)}</td><td>${linkBadge(u2.robloxLinked)}</td><td style="font-size:12px;">${u2.createdAt}</td></tr>`).join('')}
+      </tbody></table></div>
+    </div>`;
+  }
+  if (STATE.adminTab === 'records') {
+    if (STATE.recordsView) return userRecordDetail(STATE.recordsView, isAdmin);
+    return `<div class="card">
+      <h3 style="margin-top:0;">السجلات</h3>
+      <p style="color:var(--muted);font-size:13px;margin-top:-6px;">ابحث بأي من: WL User ID, Discord Username, Discord ID, Roblox Username, Roblox Display Name, Roblox ID.</p>
+      <div class="search-box"><input id="records-search-input" placeholder="مثال: omarq أو WL-1002" value="${STATE.searchQuery || ''}"><button class="btn btn-primary btn-sm" onclick="runSearch()">بحث</button></div>
+      ${STATE.searchQuery
+        ? (STATE.searchResults.length ? STATE.searchResults.map(u => `<div class="result-item" onclick="openUserRecord('${u.wlId}')"><div><b>${u.username}</b> <span class="chip-small">${u.wlId}</span> ${roleBadge(u.role)}</div><div style="font-size:12.5px;color:var(--muted);">Discord: ${u.discordUsername || '—'} · Roblox: ${u.robloxUsername || '—'}</div></div>`).join('') : emptyState('🔍', 'لا توجد نتائج', ''))
+        : emptyState('🗂️', 'ابدأ بالبحث', 'اكتب أي معرف أو اسم مستخدم أعلاه')}
+    </div>`;
+  }
+  if (STATE.adminTab === 'rules' && isAdmin) {
+    return `<div class="stack">
+      <div class="card"><h3 style="margin-top:0;">إضافة قسم جديد</h3><div class="mini-form"><input id="new-section-icon" placeholder="🚨" style="max-width:110px;"><input id="new-section-title" placeholder="اسم القسم"><button class="btn btn-primary btn-sm" onclick="addRuleSection()">إضافة القسم</button></div></div>
+      ${RULES.map(sec => `<div class="card">
+        <div class="between"><b>${sec.icon} ${sec.title}</b><div style="display:flex;gap:6px;"><button class="icon-btn" onclick="moveSection('${sec.id}',-1)">▲</button><button class="icon-btn" onclick="moveSection('${sec.id}',1)">▼</button><button class="icon-btn" onclick="deleteRuleSection('${sec.id}')">🗑 حذف القسم</button></div></div>
+        <div style="margin-top:12px;">${sec.rules.map((r, idx) => {
+          const editing = STATE.editingRule && STATE.editingRule.sectionId === sec.id && STATE.editingRule.idx === idx;
+          return `<div class="stat-row">${editing ? `<input id="edit-rule-input" value="${r.replace(/"/g, '&quot;')}" style="flex:1;margin-inline-end:8px;background:var(--bg-soft);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text);">` : `<span class="label">${idx + 1}. ${r}</span>`}<div style="display:flex;gap:6px;">${editing ? `<button class="icon-btn" onclick="saveRuleEdit('${sec.id}',${idx})">💾</button>` : `<button class="icon-btn" onclick="editRule('${sec.id}',${idx})">✏️</button>`}<button class="icon-btn" onclick="moveRule('${sec.id}',${idx},-1)">▲</button><button class="icon-btn" onclick="moveRule('${sec.id}',${idx},1)">▼</button><button class="icon-btn" onclick="deleteRule('${sec.id}',${idx})">🗑</button></div></div>`;
+        }).join('')}</div>
+        <div class="mini-form"><input id="new-rule-${sec.id}" placeholder="نص القانون الجديد"><button class="btn btn-outline btn-sm" onclick="addRuleToSection('${sec.id}')">+ إضافة قانون</button></div>
+      </div>`).join('')}
+    </div>`;
+  }
+  if (STATE.adminTab === 'settings' && isAdmin) {
+    return `<div class="card">
+      <h3 style="margin-top:0;">إعدادات اختبار التفعيل</h3>
+      <div class="settings-grid"><div class="field"><label>عدد الأسئلة (من ${QUIZ_BANK.length})</label><input id="set-numq" type="number" min="1" max="${QUIZ_BANK.length}" value="${ADMIN_SETTINGS.numQuestions}"></div><div class="field"><label>نسبة النجاح %</label><input id="set-pass" type="number" min="0" max="100" value="${ADMIN_SETTINGS.passPercent}"></div></div>
+      <h3>إعدادات Discord (عرض فقط الآن)</h3>
+      <div class="settings-grid"><div class="field"><label>اسم الرتبة عند النجاح</label><input id="set-role" value="${ADMIN_SETTINGS.discordRoleName}"></div><div class="field"><label>قناة السجلات</label><input id="set-channel" value="${ADMIN_SETTINGS.logChannelName}"></div></div>
+      <div class="disabled-note">هذه الإعدادات محلية في المتصفح حاليًا (غير محفوظة بقاعدة البيانات بعد).</div>
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="saveSettings()">حفظ الإعدادات</button>
+    </div>`;
+  }
+  if (STATE.adminTab === 'logs' && isAdmin) {
+    const LABELS = { login: ['🟢 تسجيل دخول', 'link-yes'], logout: ['🔴 تسجيل خروج', 'link-no'], link_discord: ['🔗 ربط Discord', 'role-staff'], unlink_discord: ['✂️ إلغاء ربط Discord', 'link-no'], link_roblox: ['🔗 ربط Roblox', 'role-staff'], unlink_roblox: ['✂️ إلغاء ربط Roblox', 'link-no'], role_change: ['🛡️ تغيير صلاحية', 'role-admin'], account_created: ['✨ إنشاء حساب', 'role-user'] };
+    const logs = STATE.securityLogs || [];
+    return `<div class="card">
+      <div class="between"><h3 style="margin:0;">سجل الأمان</h3><button class="icon-btn" onclick="loadAdminLogs()">🔄 تحديث</button></div>
+      <p style="color:var(--muted);font-size:13px;margin-top:6px;">كل عمليات تسجيل الدخول والخروج والربط وإلغاء الربط وتغيير الصلاحيات، لكل المستخدمين، بالترتيب الزمني.</p>
+      <div class="table-wrap"><table><thead><tr><th>الوقت</th><th>المستخدم</th><th>الحدث</th><th>التفاصيل</th></tr></thead><tbody>
+        ${logs.length ? logs.map(l => { const meta = LABELS[l.type] || ['ℹ️ ' + l.type, 'role-user']; return `<tr><td style="font-size:12px;white-space:nowrap;">${l.time}</td><td onclick="setAdminTab('records');openUserRecord('${l.wlId}')" style="cursor:pointer;color:var(--accent-2);">${l.username}</td><td><span class="role-badge ${meta[1]}">${meta[0]}</span></td><td style="font-size:13px;">${l.text}</td></tr>`; }).join('') : `<tr><td colspan="4" style="color:var(--muted);text-align:center;">جاري التحميل أو لا يوجد نشاط بعد</td></tr>`}
+      </tbody></table></div>
+    </div>`;
+  }
+  return '';
+}
+function userRecordDetail(data, isAdmin) {
+  const u = data.user, log = data.activity || [];
+  const nextRoles = ['user', 'staff', 'admin'].filter(r => r !== u.role);
+  return `<div class="stack">
+    <button class="btn btn-ghost btn-sm" style="align-self:flex-start;" onclick="closeUserRecord()">← رجوع للبحث</button>
+    <div class="profile-head"><div class="profile-av">${u.username[0]}</div><div><div style="font-size:19px;font-weight:800;">${u.username}</div><div style="color:var(--muted);font-size:13px;">${u.wlId} ${roleBadge(u.role)}</div></div>
+      ${isAdmin ? `<div style="margin-inline-start:auto;"><select onchange="if(this.value)changeUserRole('${u.wlId}',this.value)" style="background:var(--bg-soft);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:12.5px;"><option value="">تغيير الصلاحية…</option>${nextRoles.map(r => `<option value="${r}">${r}</option>`).join('')}</select></div>` : ''}
+    </div>
+    <div class="grid-2">
+      <div class="card"><h3 style="margin-top:0;">معلومات WL</h3><div class="stat-row"><span class="label">WL User ID</span><b>${u.wlId}</b></div><div class="stat-row"><span class="label">تاريخ التسجيل</span><b>${u.createdAt}</b></div><div class="stat-row"><span class="label">آخر تسجيل دخول</span><b>${u.lastLogin}</b></div></div>
+      <div class="card"><h3 style="margin-top:0;">Discord</h3><div class="stat-row"><span class="label">Username</span><b>${u.discordUsername || '—'}</b></div><div class="stat-row"><span class="label">Discord ID</span><b>${u.discordId || '—'}</b></div><div class="stat-row"><span class="label">حالة الربط</span>${linkBadge(u.discordLinked)}</div></div>
+      <div class="card"><h3 style="margin-top:0;">Roblox</h3><div class="stat-row"><span class="label">Username</span><b>${u.robloxUsername || '—'}</b></div><div class="stat-row"><span class="label">Display Name</span><b>${u.robloxDisplayName || '—'}</b></div><div class="stat-row"><span class="label">Roblox ID</span><b>${u.robloxId || '—'}</b></div><div class="stat-row"><span class="label">حالة الربط</span>${linkBadge(u.robloxLinked)}</div></div>
+      <div class="card"><h3 style="margin-top:0;">النشاطات</h3>${log.length ? log.map(a => `<div class="audit-item"><span class="t">${a.time}</span><span>${a.text}</span></div>`).join('') : emptyState('🕓', 'لا يوجد نشاط بعد', '')}</div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- ROUTER ---------------- */
+function currentPageHTML() {
+  switch (STATE.route) {
+    case 'home': return pageHome();
+    case 'login': return pageLogin();
+    case 'profile': return pageProfile();
+    case 'test': return pageTest();
+    case 'streams': return pageStreams();
+    case 'news': return pageNews();
+    case 'rules': return pageRules();
+    case 'community': return pageCommunity();
+    case 'admin': return pageAdmin();
+    default: return pageHome();
+  }
+}
+function logoutModal() {
+  if (!STATE.showLogoutConfirm) return '';
+  return `<div class="modal-backdrop" onclick="if(event.target===this)cancelLogout()">
+    <div class="modal">
+      <h3 style="margin-top:0;">تأكيد تسجيل الخروج</h3>
+      <p style="color:var(--muted);font-size:14px;">متأكد إنك تبي تسجّل خروج من حساب "${STATE.currentUser ? STATE.currentUser.username : ''}"؟</p>
+      <div style="display:flex;gap:10px;margin-top:18px;">
+        <button class="btn btn-danger" style="flex:1;" onclick="doLogout()">نعم، سجّل خروج</button>
+        <button class="btn btn-ghost" style="flex:1;" onclick="cancelLogout()">إلغاء</button>
+      </div>
+    </div>
+  </div>`;
+}
+function render() {
+  const app = document.getElementById('app');
+  app.innerHTML = `${topbar()}<main>${currentPageHTML()}</main>${footer()}${STATE.toast ? `<div class="toast">${STATE.toast}</div>` : ''}${logoutModal()}`;
+}
+render();
+restoreSession();
+
+</script>
+</body>
+</html>
