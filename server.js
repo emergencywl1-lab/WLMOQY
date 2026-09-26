@@ -512,106 +512,35 @@ function serveStatic(req, res) {
 }
 
 /* ================= OAuth: Discord / Roblox (unchanged flow) ================= */
+async function discordStart(req, res) {
+  const user = currentUserFromReq(req);
+  if (!user) return sendHTML(res, 401, setupNeededPage('Discord', ['يجب تسجيل الدخول لموقع WL أولًا قبل الربط']));
+  if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_REDIRECT_URI) return sendHTML(res, 200, setupNeededPage('Discord', ['DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'DISCORD_REDIRECT_URI']));
+  const state = newToken();
+  OAUTH_STATES.set(state, { wlId: user.wlId, provider: 'discord', expires: Date.now() + 10 * 60 * 1000 });
+  res.writeHead(302, { Location: `https://discord.com/api/oauth2/authorize?client_id=${encodeURIComponent(DISCORD_CLIENT_ID)}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify&state=${state}` });
+  res.end();
+}
 async function discordCallback(req, res, query) {
   const { code, state } = query;
-
   const saved = OAUTH_STATES.get(state);
-
-  if (!saved || saved.provider !== 'discord' || saved.expires < Date.now()) {
-    return sendHTML(res, 400, '<p>جلسة الربط منتهية.</p>');
-  }
-
+  if (!saved || saved.provider !== 'discord' || saved.expires < Date.now()) return sendHTML(res, 400, '<p>جلسة الربط منتهية.</p>');
   OAUTH_STATES.delete(state);
-
   try {
-    if (!code) {
-      throw new Error('Discord لم يرجع authorization code');
-    }
-
-    const params = new URLSearchParams({
-      client_id: DISCORD_CLIENT_ID,
-      client_secret: DISCORD_CLIENT_SECRET,
-      grant_type: 'authorization_code',
-      code,
-      redirect_uri: DISCORD_REDIRECT_URI
-    }).toString();
-
-    const tokenRes = await httpsRequest(
-      'https://discord.com/api/oauth2/token',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Content-Length': Buffer.byteLength(params)
-        },
-        body: params
-      }
-    );
-
-    console.log(
-      '[Discord OAuth] Token response:',
-      JSON.stringify(tokenRes.data)
-    );
-
-    if (!tokenRes.data || !tokenRes.data.access_token) {
-      throw new Error(
-        `Discord token exchange failed: ${JSON.stringify(tokenRes.data)}`
-      );
-    }
-
+    const params = new URLSearchParams({ client_id: DISCORD_CLIENT_ID, client_secret: DISCORD_CLIENT_SECRET, grant_type: 'authorization_code', code, redirect_uri: DISCORD_REDIRECT_URI }).toString();
+    const tokenRes = await httpsRequest('https://discord.com/api/oauth2/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': Buffer.byteLength(params) }, body: params });
     const accessToken = tokenRes.data.access_token;
-
-    const userRes = await httpsRequest(
-      'https://discord.com/api/users/@me',
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
-      }
-    );
-
-    console.log(
-      '[Discord OAuth] User response:',
-      JSON.stringify(userRes.data)
-    );
-
+    if (!accessToken) throw new Error('discord token exchange failed');
+    const userRes = await httpsRequest('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${accessToken}` } });
     const du = userRes.data;
-
-    if (!du || !du.id) {
-      throw new Error(
-        `Discord user lookup failed: ${JSON.stringify(userRes.data)}`
-      );
-    }
-
     const target = DB.users.find(u => u.wlId === saved.wlId);
-
     if (target) {
-      target.discordId = du.id;
-      target.discordUsername = du.username;
-      target.discordLinked = true;
-
-      logAndNotify(
-        target.wlId,
-        target.username,
-        `تم ربط حساب Discord (${du.username}).`,
-        'link_discord'
-      );
-
+      target.discordId = du.id; target.discordUsername = du.username; target.discordLinked = true;
+      logAndNotify(target.wlId, target.username, `تم ربط حساب Discord (${du.username}).`, 'link_discord');
       await saveDB(DB);
     }
-
-    res.writeHead(302, { Location: '/?linked=discord' });
-    res.end();
-
-  } catch (e) {
-    console.error('[Discord OAuth ERROR]', e);
-
-    sendHTML(
-      res,
-      500,
-      `<p>خطأ أثناء الربط: ${e.message}</p><a href="/">رجوع</a>`
-    );
-  }
+    res.writeHead(302, { Location: '/?linked=discord' }); res.end();
+  } catch (e) { sendHTML(res, 500, `<p>خطأ أثناء الربط: ${e.message}</p><a href="/">رجوع</a>`); }
 }
 async function robloxStart(req, res) {
   const user = currentUserFromReq(req);
